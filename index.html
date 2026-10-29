@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello World</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 24px;
+    }
+    .card {
+      background: #fff; border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px 36px; max-width: 480px; width: 100%; text-align: center;
+    }
+    h1 { font-size: 30px; color: #222; margin-bottom: 18px; }
+    .status { font-size: 18px; color: #555; min-height: 26px; margin-bottom: 22px; }
+    .api-url {
+      display: inline-block; font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 14px; color: #667eea; background: #f2f3ff;
+      border: 1px dashed #c7ccf5; border-radius: 10px; padding: 8px 14px;
+    }
+    .hint { margin-top: 18px; font-size: 13px; color: #999; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Hello, World! 👋</h1>
+    <p id="status">正在调用 Python 接口 /api …</p>
+    <span class="api-url">https://<你的域名>.vercel.app/api</span>
+    <p class="hint">静态首页由 Vercel 直接托管，/api 为 Python 服务函数</p>
+  </main>
+  <script>
+    fetch('/api')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        document.getElementById('status').textContent = data.message;
+      })
+      .catch(function () {
+        document.getElementById('status').textContent = '接口暂未响应，静态首页可正常访问。';
+      });
+  </script>
+</body>
+</html>
