@@ -71,6 +71,7 @@
       margin-top: 10px;
       font-size: 13px;
       color: #94a3b8;
+      word-break: break-all;
     }
     .meta code {
       padding: 2px 7px;
@@ -115,61 +116,54 @@
       var dot = document.getElementById('dot');
       var statusText = document.getElementById('statusText');
 
-      var offset = 0;        // 服务器时间 - 本地时间（毫秒）
-      var timer = null;
+      // 服务器时间与本地时间的差值（毫秒）
+      var offset = 0;
+      var weekday = '日一二三四五六';
 
-      function two(n) { return n < 10 ? '0' + n : '' + n; }
+      function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
-      function formatCST(ms) {
-        var d = new Date(ms + offset);
-        var utc8 = new Date(d.getTime() + d.getTimezoneOffset() * 60000 + 8 * 3600000);
-        return utc8.getFullYear() + '年' + two(utc8.getMonth() + 1) + '月' + two(utc8.getDate()) + '日 '
-          + '星期' + '日一二三四五六'.charAt(utc8.getDay()) + '  '
-          + two(utc8.getHours()) + ':' + two(utc8.getMinutes()) + ':' + two(utc8.getSeconds());
-      }
-
+      // 统一按 UTC+8 展示，不受访问者所在时区影响
       function render() {
-        clock.textContent = formatCST(Date.now());
+        var d = new Date(Date.now() + offset + 8 * 3600 * 1000);
+        clock.textContent =
+          d.getUTCFullYear() + '年' + pad(d.getUTCMonth() + 1) + '月' + pad(d.getUTCDate()) + '日 ' +
+          '星期' + weekday.charAt(d.getUTCDay()) + '　' +
+          pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ':' + pad(d.getUTCSeconds());
       }
 
-      function tick() {
-        render();
-        timer = setTimeout(tick, 1000);
+      function markOk(text) {
+        dot.className = 'dot';
+        statusText.textContent = text;
       }
 
-      var syncTimer = null;
-
-      function fail() {
+      function markErr(text) {
         dot.className = 'dot err';
-        statusText.textContent = '未能获取服务器时间（/api/time 不可用），以下为本地时间';
-        syncTimer = setTimeout(sync, 5000);
-        if (!timer) { tick(); }
+        statusText.textContent = text;
       }
 
       function sync() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/api/time?_=' + Date.now(), true);
-        xhr.timeout = 8000;
-        xhr.onload = function () {
-          try {
-            var data = JSON.parse(xhr.responseText);
-            var serverNow = new Date(data.iso).getTime();
-            offset = serverNow - Date.now();
-            dot.className = 'dot';
-            statusText.textContent = '已连接服务器 · 时区 ' + (data.timezone || 'Asia/Shanghai');
-            meta.innerHTML = '数据来源：<code>GET /api/time</code> · 服务器时钟 ' +
-              (data.serverClock || '');
-            if (timer) { clearTimeout(timer); }
-            tick();
-          } catch (e) {
-            fail();
-          }
-        };
-        xhr.onerror = fail;
-        xhr.ontimeout = fail;
+        var url = '/api/time?ts=' + Date.now();
+        fetch(url, { cache: 'no-store' })
+          .then(function (res) {
+            if (!res.ok) { throw new Error('HTTP ' + res.status); }
+            return res.json();
+          })
+          .then(function (data) {
+            offset = new Date(data.iso).getTime() - Date.now();
+            markOk('已连接服务器 · 时区 ' + (data.timezone || 'Asia/Shanghai') +
+                   ' · 运行时 ' + (data.runtime || 'nodejs'));
+            meta.innerHTML = '数据来源：<code>GET /api/time</code> · 服务器时钟 ' + (data.serverClock || '');
+            render();
+          })
+          .catch(function (err) {
+            markErr('未能获取服务器时间（' + err.message + '），以下为本地时间');
+          });
       }
 
+      render();
+      setInterval(render, 1000);
       sync();
+      setInterval(sync, 30000);
     })();
   </script>
 </body>
