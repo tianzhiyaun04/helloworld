@@ -3,7 +3,7 @@
 低代码开发实践 · 课堂练习一产物。用自然语言指挥 AI 生成代码，再走通「本地跑通 → GitHub → Vercel → 公网可访问」的完整链路。
 
 - GitHub 仓库：https://github.com/tianzhiyaun04/helloworld
-- 生产访问地址：https://helloworld-eta-seven.vercel.app
+- 自定义域名：https://tianzhiyuan01.rangzijigenghao.online（DNS 配置完成后生效）
 
 ## 页面内容
 
@@ -39,14 +39,6 @@ node server.js
 2. Framework Preset 自动识别为 `Node`，其余保持默认；
 3. 点击 Deploy，约 1 分钟后部署完成，状态为 `Ready`。
 
-## 访问不通时的处理
-
-国内部分网络（含校园网/家用宽带）对 `*.vercel.app` 存在 DNS 污染与连接阻断，直连会 `ERR_CONNECTION_TIMED_OUT`。处理方式：
-
-- 换网络验证（手机 4G/5G）；
-- 挂代理后访问；
-- 绑定自定义域名（手册练习三：dnshe.com 申请域名 → Vercel Domains 添加 → 按提示配 CNAME）。
-
 ## 更新记录
 
-- 2026-11-05：重新绑定生产域名并重建部署（原部署记录被误删）。
+- 2026-11-05：重新触发部署，自定义域名 `tianzhiyuan01.rangzijigenghao.online` 已加入项目并指向 Production。
